@@ -41,7 +41,7 @@ SoftAssert softAssert = new SoftAssert();
         int i = new Random().nextInt(1000);
         RegistrationBodyDto user = RegistrationBodyDto.builder()
                 .username("banana" + i + "@gmail.com")
-                .password("banana" + i + "!")
+                .password("banana" + i)
                 .firstName("Banana")
                 .lastName("Mama")
                 .build();
@@ -49,6 +49,29 @@ SoftAssert softAssert = new SoftAssert();
         softAssert.assertEquals(response.getStatusCode(), 400, "validate status code");
         ErrorMessageDtoString errorMessageDtoString = response.getBody().as(ErrorMessageDtoString.class);
         softAssert.assertEquals(errorMessageDtoString.getError(), "Bad Request", "validate error");
+        softAssert.assertTrue(errorMessageDtoString.getMessage().toString().contains("Can contain special characters [@$#^&*!]"));
+        softAssert.assertAll();
+        System.out.println(response.getBody().asString());
+
+    }
+
+    //@gmail.com, qwerty@e, qwerty@.com, qwerty@@gmail.com, qwerty@e., qwerty @gmail.com, qwerty@мама.com, spaces before and after
+    //Aaaa432, aaaa432!, Aaaaaaa#, AAAA234@, Фффф123$,
+
+    @Test
+    public void registrationNegativeTest_EmptyFirstName() {
+        int i = new Random().nextInt(1000);
+        RegistrationBodyDto user = RegistrationBodyDto.builder()
+                .username("banana" + i + "@gmail.com")
+                .password("Banana" + i + "!")
+                .firstName("")
+                .lastName("Mama")
+                .build();
+        Response response = registrationLogin(user, REGISTRATION_URL);
+        softAssert.assertEquals(response.getStatusCode(), 400, "validate status code");
+        ErrorMessageDtoString errorMessageDtoString = response.getBody().as(ErrorMessageDtoString.class);
+        softAssert.assertEquals(errorMessageDtoString.getError(), "Bad Request", "validate error");
+        softAssert.assertTrue(errorMessageDtoString.getMessage().toString().contains("not be blank"));
         softAssert.assertAll();
         System.out.println(response.getBody().asString());
     }
