@@ -4,12 +4,10 @@ import config.AppiumConfig;
 import dto.CarDto;
 import dto.RegistrationBodyDto;
 import io.restassured.response.Response;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import screens.LoginScreen;
-import screens.MyCarsScreen;
-import screens.SearchScreen;
-import screens.SplashScreen;
+import screens.*;
 
 import java.util.Random;
 
@@ -32,22 +30,29 @@ public class AddNewCarTests extends AppiumConfig {
 
     @Test
     public void addNewCarPositiveTest(){
+        int i = new Random().nextInt(1000)+1000;
+        CarDto car = CarDto.builder()
+                .serialNumber("001-" + i)
+                .manufacture("Renault")
+                .model("Clio")
+                .city("Raanana")
+                .pricePerDay(400.5)
+                .carClass("B")
+                .fuel("Diesel")
+                .year("2022")
+                .seats(5)
+                .about("My lovely car")
+                .build();
         SearchScreen searchScreen = new SearchScreen(driver);
         searchScreen.clickBtnDots();
         searchScreen.clickBtnMyCars();
         MyCarsScreen myCarsScreen = new MyCarsScreen(driver);
         myCarsScreen.clickBtnAddNewCar();
-        int i = new Random().nextInt(1000)+1000;
-        CarDto car = CarDto.builder()
-                .serialNumber("345" + i)
-                .manufacture("Renault")
-                .model("Clio")
-                .year("2022")
-                .fuel("Electric")
-                .seats(5)
-                .carClass("B")
-                .pricePerDay(400.5)
-                .city("Raanana")
-                .build();
+        AddNewCarScreen addNewCarScreen = new AddNewCarScreen(driver);
+        addNewCarScreen.typeAddNewCarForm(car);
+        addNewCarScreen.clickBtnAdd();
+        Assert.assertTrue(searchScreen.textInElementPresent_popUpMessageSuccess("Car was added!"));
+
+
     }
 }
